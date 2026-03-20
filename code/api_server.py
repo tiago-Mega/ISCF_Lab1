@@ -12,7 +12,7 @@ import requests
 # Load environment variables
 BASE_DIR = Path(__file__).resolve().parent
 env_path = BASE_DIR / "../.env"
-load_dotenv(env_path)
+load_dotenv(env_path) 
 
 # ==================== CONFIGURATION ====================
 DATABASE_URL = os.getenv("DATABASE_URL")
