@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/client'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -29,6 +30,10 @@ export default function LoginPage() {
       <input type="password" placeholder="Password" value={password}
         onChange={e => setPassword(e.target.value)} className="border p-2 rounded" required />
       <button type="submit" className="bg-blue-600 text-white p-2 rounded">Sign In</button>
+      <p className="text-sm text-center">
+        Don&apos;t have an account?{' '}
+        <Link href="/register" className="text-blue-600 underline">Create one</Link>
+      </p>
     </form>
   )
 }
