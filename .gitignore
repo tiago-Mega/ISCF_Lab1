@@ -2,7 +2,6 @@
 
 # Ignore the .env file containing environment variables (e.g., API keys)
 .env
-.env.local
 
 # Python runtime
 __pycache__/
@@ -13,7 +12,7 @@ __pycache__/
 *.db
 
 # Platform binaries
-*.dll
+*.dll  
 
 # CoppeliaSim scene (large binary — distribute separately)
 *.ttt
