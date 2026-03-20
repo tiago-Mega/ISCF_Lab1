@@ -1,0 +1,23 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Ignore the .env file containing environment variables (e.g., API keys)
+.env
+.env.local
+
+# Python runtime
+__pycache__/
+*.pyc
+*.pyo
+
+# Database files
+*.db
+
+# Platform binaries
+*.dll
+
+# CoppeliaSim scene (large binary — distribute separately)
+*.ttt
+
+# Node
+iscf-app/node_modules/
+iscf-app/.next/
