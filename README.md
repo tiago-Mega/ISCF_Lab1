@@ -1,30 +1,40 @@
-# ISCF Lab 1 — CPS Sensor Data Collection & Dashboard
+# ISCF Lab 1 — UR5 Accelerometer Monitor
 
-A full-stack Cyber-Physical System (CPS) integration project built for the **Systems Integration (ISCF)** course. The system collects real-time accelerometer data from a CoppeliaSim robotic simulation, enriches it with live weather data, persists it to a cloud database (Supabase), and visualizes it through a web dashboard.
+A full-stack Cyber-Physical System (CPS) monitoring application that extracts real-time accelerometer data (X, Y, Z axes) from a **UR5 robot** simulated in **CoppeliaSim**, stores it in a cloud database (**Supabase**), enriches it with ambient temperature data from **OpenWeather**, and visualizes everything through a live **Next.js** dashboard deployed on **Vercel**.
 
 ---
 
 ## Architecture
 
 ```
-CoppeliaSim Simulation
+CoppeliaSim (UR5 Robot)
         │
         │  Remote API (port 19997)
         ▼
-coppelia_probe.py          ← Reads accelX/Y/Z signals + Lisbon weather
+ Python FastAPI (Local)  ◄──── OpenWeather REST API
         │
-        │  HTTP POST /sensor_data.json
+        │  REST / Supabase Client
         ▼
-api_server.py (FastAPI)    ← REST API on port 8000
+    Supabase (PostgreSQL + Realtime)
         │
-        │  Supabase REST API
+        │  Realtime Subscriptions
         ▼
-Supabase (PostgreSQL)      ← Cloud persistent storage
-        ▲
-        │  HTTP GET (polling every 5s)
-        │
-iscf-app/ (Next.js)        ← Web dashboard on port 3000
+  Next.js Dashboard (Vercel)
 ```
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Robot Simulation | CoppeliaSim Edu v4.1.0 |
+| Backend / Integration | Python 3.7 + FastAPI |
+| External Weather API | OpenWeather Current Weather |
+| Cloud Database | Supabase (PostgreSQL + Realtime) |
+| Frontend | Next.js (JavaScript) |
+| Deployment | Vercel |
+| Version Control | GitHub |
 
 ---
 
@@ -43,16 +53,28 @@ ISCF_Lab1_Material/
 │
 ├── iscf-app/                      # Next.js frontend
 │   ├── app/
-│   │   └── page.tsx               # Main dashboard page
+│   │   ├── page.tsx               # Main dashboard page
+│   │   ├── layout.tsx             # Layout dashboar     
+│   │   ├── login
+│   │   |   └── page.tsx           # Login page
+│   │   └── register
+│   │       └── page.tsx           # New client register page
+│   │
 │   ├── components/
 │   │   ├── SensorCard.tsx         # Current reading card
 │   │   ├── AccelerationChart.tsx  # X/Y/Z time-series chart
+│   │   ├── ReportDownload.tsx     # Report download 
+│   │   ├── LogoutButton.tsx       # Logout Button
 │   │   ├── TemperatureChart.tsx   # Temperature time-series chart
 │   │   └── DelayControl.tsx       # Remote sampling delay slider
 │   ├── lib/
+│   │   ├── supabase.ts            #
+│   │   ├── server.ts              #
+│   │   ├── client.ts              #
 │   │   └── api.ts                 # API client (axios wrappers)
 │   └── package.json
 │
+├──middleware.ts                   #
 ├── iscf_lab1_2023.ttt             # CoppeliaSim scene file
 ├── remoteApiConnections.txt       # CoppeliaSim remote API config reference
 └── README.md
@@ -62,38 +84,44 @@ ISCF_Lab1_Material/
 
 ## Prerequisites
 
-| Tool | Version | Purpose |
-|---|---|---|
-| Python | ≥ 3.9 | Backend probe and API server |
-| Node.js | ≥ 18 | Next.js frontend |
-| CoppeliaSim | ≥ 4.x | Robotics simulator |
-| Supabase account | — | Cloud database |
-| OpenWeatherMap API key | — | Live temperature data |
+- [Anaconda / Miniconda](https://www.anaconda.com/products/individual) with **Python 3.7**
+- [CoppeliaSim Edu v4.1.0](https://www.coppeliarobotics.com/previousVersions)
+- [Node.js](https://nodejs.org/) (for the Next.js frontend)
+- [VSCode](https://code.visualstudio.com/) or equivalent IDE
+- A [Vercel](https://vercel.com/) account (recommended: use your github account)
+- A [Supabase](https://supabase.com) account (recommended: use your FCT university email `@campus.fct.unl.pt`)
+- An [OpenWeather](https://openweathermap.org) API key (register with your student email for a higher free-tier limit via the [student initiative](https://docs.openweather.co.uk/our-initiatives/student-initiative))
+
+---
+
+## Features
+
+- **Real-time accelerometer monitoring** — Continuously reads X, Y, Z axis data from the UR5 robot in CoppeliaSim via a Python FastAPI integration layer
+- **Ambient temperature enrichment** — Fetches current weather data from OpenWeather API and stores it alongside sensor readings
+- **Cloud persistence** — All data is stored in a Supabase (PostgreSQL) database with real-time subscription support
+- **Interactive dashboard** — Next.js frontend with live graphs, configurable polling intervals, and automatic Vercel deployment
+- **Downloadable reports** — Automatically generated statistics (average, min, max) for user-defined time intervals (e.g., last 10, 30, 60 minutes)
 
 ---
 
 ## Environment Variables
 
-### `.gitignore/.env`
-Create this file in the `.gitignore/` directory. **Never commit it.**
+### `.env`
+Create this file in the `root` directory. **Never commit it.**
 
 ```env
 # FastAPI server URL (used by the probe to POST data)
-API_URL=http://127.0.0.1:8000
+API_URL = http://127.0.0.1:8000
 
 # Supabase project URL and anon/service key
-DATABASE_URL=https://<your-project>.supabase.co
-SUPABASE_KEY=<your-supabase-anon-key>
+DATABASE_URL = https://<your-project>.supabase.co
+SUPABASE_KEY = <your-supabase-anon-key>
 
 # OpenWeatherMap API key
 OPENWEATHER_API_KEY=<your-openweathermap-key>
-```
 
-### `iscf-app/.env`
-Create this file in the `iscf-app/` directory. **Never commit it.**
-
-```env
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+# CORS CONFIGURATION 
+ALLOWED_ORIGINS = http://localhost:3000,https://your.vercel.app
 ```
 
 ---
@@ -145,15 +173,7 @@ npm install
 
 ## Running the System
 
-Open **four separate terminals** and run each command in order:
-
-**Terminal 4 — CoppeliaSim:**
-```
-Get the value int of delay
-```
-```bash
-curl http://127.0.0.1:8000/delay.json
-```
+Open **three separate terminals** and run each command in order:
 
 **Terminal 1 — FastAPI Server:**
 ```bash
@@ -178,7 +198,7 @@ cd iscf-app/
 npm run dev
 ```
 
-Open your browser at **http://localhost:3000**
+Open your browser at **http://localhost:3000** or https://your.vercel.app
 
 ---
 
@@ -189,7 +209,7 @@ Interactive docs are available at `http://127.0.0.1:8000/docs` when the server i
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/sensor_data.json` | Receive and store a new sensor reading |
+| `POST`| `/sensor_data.json` | Receive and store a new sensor reading |
 | `GET` | `/sensor_data.json` | Retrieve the most recent sensor reading |
 | `GET` | `/sensor_data/history.json?limit=100` | Retrieve last N readings (max 1000) |
 | `GET` | `/delay.json` | Get the current sampling delay (seconds) |
@@ -202,18 +222,6 @@ curl -X PUT http://127.0.0.1:8000/delay.json \
      -d '{"value": 10}'
 ```
 
----
-
-## Dashboard Features
-
-- **Live sensor cards** — current X, Y, Z acceleration (m/s²) and Lisbon temperature (°C)
-- **Acceleration chart** — time-series line chart for all three axes
-- **Temperature chart** — temperature trend over the last 50 readings
-- **Delay control** — slider to remotely change the probe's sampling interval (1–30 seconds)
-- **Auto-refresh** — dashboard polls the API every 5 seconds automatically
-
----
-
 ## Troubleshooting
 
 **Probe fails to connect to CoppeliaSim**
@@ -222,15 +230,15 @@ curl -X PUT http://127.0.0.1:8000/delay.json \
 - Confirm `sim.py`, `simConst.py`, and `remoteApi.dll` are present in `code/`
 
 **CORS errors in the browser**
-- Confirm `CORSMiddleware` is configured in `api_server.py` with `allow_origins=["http://localhost:3000"]`
+- Confirm `CORSMiddleware` is configured in `api_server.py` with `allow_origins = ALLOWED_ORIGINS = http://localhost:3000,https://your.vercel.app`
 
 **No data appearing in the dashboard**
 - Run `curl http://127.0.0.1:8000/sensor_data.json` to verify the API is reachable
-- Check that `NEXT_PUBLIC_API_URL` is correctly set in `iscf-app/.env.local`
+- Check that `NEXT_PUBLIC_API_URL` is correctly set in `iscf-app/next.config.ts`
 - Open browser DevTools → Network tab and check for failed API calls
 
 **Supabase writes failing**
-- Double-check `DATABASE_URL` and `SUPABASE_KEY` values in `code/.env`
+- Double-check `DATABASE_URL` and `SUPABASE_KEY` values in `.env`
 - Verify the `accelerometer_data` table exists in your Supabase project
 
 ---
@@ -242,7 +250,6 @@ Ensure the following are excluded from version control:
 ```
 # Secrets
 .env
-.env.local
 
 # Runtime artifacts
 *.db
