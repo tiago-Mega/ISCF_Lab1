@@ -1,11 +1,11 @@
 'use client';
 import React, { useState } from 'react';
 import { getSensorDataReport, ReportResponse } from '@/lib/api';
-import jsPDF from 'jspdf';
 
 const TIME_OPTIONS = [10, 30, 60];
 
-function generatePDF(report: ReportResponse, minutes: number): void {
+async function generatePDF(report: ReportResponse, minutes: number): Promise<void> {
+  const { default: jsPDF } = await import('jspdf');
   const doc = new jsPDF();
   const now = new Date().toLocaleString('pt-PT');
 
@@ -61,7 +61,7 @@ export default function ReportDownload() {
     setError('');
     try {
       const report = await getSensorDataReport(minutes);
-      generatePDF(report, minutes);
+      await generatePDF(report, minutes);
     } catch {
       setError('Failed to generate report. No data in this time window?');
     } finally {
