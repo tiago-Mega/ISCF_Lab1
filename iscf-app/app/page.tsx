@@ -1,14 +1,16 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import { getLatestSensorData, getSensorDataHistory, SensorData, HistoryResponse } from '@/lib/api';
 
 import SensorCard from '@/components/SensorCard';
 import DelayControl from '@/components/DelayControl';
-import ReportDownload from '@/components/ReportDownload';
 import TemperatureChart from '@/components/TemperatureChart';
 import AccelerationChart from '@/components/AccelerationChart';
+const ReportDownload = dynamic(() => import('@/components/ReportDownload'), { ssr: false });
+
 const HISTORY_LIMIT = 100;
 
 export default function Home() {
