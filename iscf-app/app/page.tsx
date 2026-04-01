@@ -69,7 +69,7 @@ export default function Home() {
           </div>
           {latestData && (
             <span className="text-xs text-gray-400">
-              Last updated: {new Date(latestData.timestamp).toLocaleString()}
+              Last updated: {new Date(latestData.timestamp).toLocaleString('pt-PT')}
             </span>
           )}
         </div>
