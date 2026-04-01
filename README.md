@@ -56,7 +56,7 @@ ISCF_Lab1_Material/
 │   │   ├── page.tsx               # Main dashboard page
 │   │   ├── layout.tsx             # Layout dashboar     
 │   │   ├── login
-│   │   |   └── page.tsx           # Login page
+│   │   │   └── page.tsx           # Login page
 │   │   └── register
 │   │       └── page.tsx           # New client register page
 │   │
@@ -68,13 +68,13 @@ ISCF_Lab1_Material/
 │   │   ├── TemperatureChart.tsx   # Temperature time-series chart
 │   │   └── DelayControl.tsx       # Remote sampling delay slider
 │   ├── lib/
-│   │   ├── supabase.ts            #
-│   │   ├── server.ts              #
-│   │   ├── client.ts              #
+│   │   ├── supabase.ts            # Supabase client config
+│   │   ├── server.ts              # Server-side Supabase client
+│   │   ├── client.ts              # Browser-side Supabase client
 │   │   └── api.ts                 # API client (axios wrappers)
 │   └── package.json
 │
-├──middleware.ts                   #
+├── middleware.ts                  # Auth middleware 
 ├── iscf_lab1_2023.ttt             # CoppeliaSim scene file
 ├── remoteApiConnections.txt       # CoppeliaSim remote API config reference
 └── README.md
@@ -90,7 +90,7 @@ ISCF_Lab1_Material/
 - [VSCode](https://code.visualstudio.com/) or equivalent IDE
 - A [Vercel](https://vercel.com/) account (recommended: use your github account)
 - A [Supabase](https://supabase.com) account (recommended: use your FCT university email `@campus.fct.unl.pt`)
-- An [OpenWeather](https://openweathermap.org) API key (register with your student email for a higher free-tier limit via the [student initiative](https://docs.openweather.co.uk/our-initiatives/student-initiative))
+- A [OpenWeather](https://openweathermap.org) API key (register with your student email for a higher free-tier limit via the [student initiative](https://docs.openweather.co.uk/our-initiatives/student-initiative))
 
 ---
 
@@ -171,6 +171,15 @@ npm install
 
 ---
 
+## Deployment (Vercel)
+
+1. Push `ISCF_Lab1` to a GitHub repository
+2. Import the repository on [vercel.com](https://vercel.com) but with `iscf-app` as the main directory
+3. Set environment variables in **Vercel → Project Settings → Environment Variables**
+4. Every push to `main` triggers an automatic redeployment
+
+---
+
 ## Running the System
 
 Open **three separate terminals** and run each command in order:
@@ -221,6 +230,8 @@ curl -X PUT http://127.0.0.1:8000/delay.json \
      -H "Content-Type: application/json" \
      -d '{"value": 10}'
 ```
+
+---
 
 ## Troubleshooting
 
