@@ -207,7 +207,9 @@ cd iscf-app/
 npm run dev
 ```
 
-Open your browser at **http://localhost:3000** or https://your.vercel.app
+Open your browser for Fast API at **http://127.0.0.1:8000/docs** and,
+for Vercel app **https://iscf-lab1-three.vercel.app**
+
 
 ---
 
