@@ -1,33 +1,54 @@
 'use client';
-
 import React, { useState } from 'react';
 import { getSensorDataReport, ReportResponse } from '@/lib/api';
+import jsPDF from 'jspdf';
 
 const TIME_OPTIONS = [10, 30, 60];
 
-function statsToCSV(report: ReportResponse): string {
-  const headers = ['Axis', 'Min', 'Max', 'Average'];
+function generatePDF(report: ReportResponse, minutes: number): void {
+  const doc = new jsPDF();
+  const now = new Date().toLocaleString('pt-PT');
+
+  // Title
+  doc.setFontSize(18);
+  doc.text('UR5 Accelerometer Report', 20, 20);
+
+  // Metadata
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Generated: ${now}`, 20, 30);
+  doc.text(`Time window: Last ${minutes} minutes`, 20, 36);
+  doc.text(`From: ${new Date(report.from).toLocaleString('pt-PT')}`, 20, 42);
+  doc.text(`To:   ${new Date(report.to).toLocaleString('pt-PT')}`, 20, 48);
+  doc.text(`Records analysed: ${report.record_count}`, 20, 54);
+
+  // Table header
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+  doc.text('Axis', 20, 70);
+  doc.text('Min', 70, 70);
+  doc.text('Max', 110, 70);
+  doc.text('Average', 150, 70);
+  doc.line(20, 72, 190, 72);
+
+  // Table rows
   const rows = [
-    ['X (m/s²)', report.x.min, report.x.max, report.x.avg],
-    ['Y (m/s²)', report.y.min, report.y.max, report.y.avg],
-    ['Z (m/s²)', report.z.min, report.z.max, report.z.avg],
+    ['X (m/s²)',        report.x.min,           report.x.max,           report.x.avg],
+    ['Y (m/s²)',        report.y.min,           report.y.max,           report.y.avg],
+    ['Z (m/s²)',        report.z.min,           report.z.max,           report.z.avg],
     ['Temperature (°C)', report.temperature.min, report.temperature.max, report.temperature.avg],
   ];
 
-  const meta = [
-    `Report generated:,${new Date().toLocaleString()}`,
-    `Time window:,Last ${report.time_window_minutes} minutes`,
-    `Records analysed:,${report.record_count}`,
-    `From:,${new Date(report.from).toLocaleString()}`,
-    `To:,${new Date(report.to).toLocaleString()}`,
-    '',
-  ];
+  doc.setFontSize(11);
+  rows.forEach((row, i) => {
+    const y = 82 + i * 10;
+    doc.text(String(row[0]), 20, y);
+    doc.text(Number(row[1]).toFixed(3), 70, y);
+    doc.text(Number(row[2]).toFixed(3), 110, y);
+    doc.text(Number(row[3]).toFixed(3), 150, y);
+  });
 
-  return [
-    ...meta,
-    headers.join(','),
-    ...rows.map(r => r.join(',')),
-  ].join('\n');
+  doc.save(`UR5_Report_last_${minutes}min_${Date.now()}.pdf`);
 }
 
 export default function ReportDownload() {
@@ -40,14 +61,7 @@ export default function ReportDownload() {
     setError('');
     try {
       const report = await getSensorDataReport(minutes);
-      const csv = statsToCSV(report);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `UR5_Report_last_${minutes}min_${Date.now()}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
+      generatePDF(report, minutes);
     } catch {
       setError('Failed to generate report. No data in this time window?');
     } finally {
