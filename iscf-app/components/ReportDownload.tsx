@@ -92,7 +92,7 @@ export default function ReportDownload() {
           disabled={loading}
           className="ml-auto px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
         >
-          {loading ? 'Generating...' : '⬇ Download CSV'}
+          {loading ? 'Generating...' : '⬇ Download PDF'}
         </button>
       </div>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
